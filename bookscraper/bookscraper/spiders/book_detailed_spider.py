@@ -35,7 +35,7 @@ class BookDetailedSpiderSpider(scrapy.Spider):
         book_item['book_url'] = response.url
         book_item['book_name'] =  response.css('li.active ::text').get()
         book_item['book_category'] = response.xpath("//ul[@class='breadcrumb']/li[@class='active']/preceding-sibling::li[1]/a/text()").get()
-        book_item['rating'] = response.css('a::text')[-1].get()
+        book_item['rating'] = response.css("p.star-rating").attrib['class']
         book_item['upc'] = response.css('table tr td::text')[0].get()
         book_item['product_type'] = response.css('table tr td::text')[1].get()
         book_item['price_excl_tax'] = response.css('table tr td::text')[2].get()
