@@ -48,7 +48,6 @@ class BookscraperPipeline:
         
         ## Stars --> convert text to number
         stars_string = adapter.get('rating')
-        print("*********")
         split_stars_array = stars_string.split(' ')
         print(split_stars_array)
         stars_text_value = split_stars_array[1].lower()
