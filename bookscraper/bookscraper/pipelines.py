@@ -49,7 +49,6 @@ class BookscraperPipeline:
         ## Stars --> convert text to number
         stars_string = adapter.get('rating')
         split_stars_array = stars_string.split(' ')
-        print(split_stars_array)
         stars_text_value = split_stars_array[1].lower()
         if stars_text_value == "zero":
             adapter['rating'] = 0
@@ -65,3 +64,79 @@ class BookscraperPipeline:
             adapter['rating'] = 5
         
         return item
+
+
+import sqlite3
+
+class SaveToSQLitePipeline:
+
+    def __init__(self):
+        self.conn = sqlite3.connect('books.db')
+
+        self.cur = self.conn.cursor()
+
+        self.cur.execute("""
+                    CREATE TABLE IF NOT EXISTS books(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                        book_url TEXT,
+                        book_name TEXT,
+                        upc TEXT,
+                        product_type TEXT,
+                        price_excl_tax REAL,
+                        price_incl_tax REAL,
+                        tax REAL,
+                        availability INTEGER,
+                        number_of_reviews INTEGER,
+                        rating INTEGER,
+                        book_category TEXT,
+                        description TEXT
+                    )
+                        """)
+        
+    def process_item(self, item, spider):
+        self.cur.execute("""INSERT INTO books (
+            book_url, 
+            book_name, 
+            upc, 
+            product_type, 
+            price_excl_tax,
+            price_incl_tax,
+            tax,
+            availability,
+            number_of_reviews,
+            rating,
+            book_category,
+            description
+            ) VALUES (
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?
+                )""", (
+            item["book_url"],
+            item["book_name"],
+            item["upc"],
+            item["product_type"],
+            item["price_excl_tax"],
+            item["price_incl_tax"],
+            item["tax"],
+            item["availability"],
+            item["number_of_reviews"],
+            item["rating"],
+            item["book_category"],
+            str(item["description"])
+        ))
+
+        self.conn.commit()
+
+    def close_spider(self, spider):
+        self.cur.close()
+        self.conn.close()
